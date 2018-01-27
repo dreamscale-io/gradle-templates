@@ -1,6 +1,5 @@
 package ${servicePackage};
 
-import com.blackbaud.boot.config.CommonSpringConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration;
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan("${servicePackage}")
-public class ${serviceName} extends CommonSpringConfig {
+public class ${serviceName} {
 
     public static void main(String[] args) {
         SpringApplication.run(${serviceName}.class, args);

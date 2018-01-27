@@ -1,4 +1,4 @@
-# Blackbaud Project Templates
+# DreamScale Project Templates
 
 This project is used to bootstrap new projects as well as adding to existing projects.  
 
@@ -38,31 +38,25 @@ Supported task options:
 
 Creates a skeleton SpringBoot project (includes build.gradle, application class, and supporting classes)
 
-You WILL get an error when running `./gradlew bootRun`:
-* After creating your project, update application.properties `server.port` and `management.port` values following
-the convention described in the [Blackbaud Wiki](https://wiki.blackbaud.com/display/LUM/Microservice+Port+Mapping+Registry)
-
 Supported task options:
 * clean - if the target directory already exists, delete it
 * postgres - initializes the project with a postgres container and supporting files
-* mybatis - initializes the project with a mybatis generator config and applies the mybatis plugin; also, applies the postgres option above
-* kafka - initializes the project with a kafka container and supporting files
 * serviceName - the name of the SpringBoot application entrypoint, defaults to the repository name, converted to upper camel-case
-* servicePackageName - the name of the core package (contains the application entrypoint), defaults to "com.blackbaud.${serviceName.toLowercase()}"
+* servicePackageName - the name of the core package (contains the application entrypoint), defaults to "org.dreamscale.${serviceName.toLowercase()}"
 
 ### Project Augmentation Tasks
 
-The project augmentation tasks are available when run from this project but also when the `blackbaud-templates` plugin
+The project augmentation tasks are available when run from this project but also when the `dreamscale-templates` plugin
 is applied to another project like so...  
 
 ```
 buildscript {
     dependencies {
-        classpath "com.blackbaud:gradle-templates:2+"
+        classpath "org.dreamscale:gradle-templates:1.+"
     }
 }
 
-apply plugin: "blackbaud-templates"
+apply plugin: "dreamscale-templates"
 ```
 
 In this case, the target directory will be the project which applies the plugin and the project property `repoName` 
@@ -71,8 +65,20 @@ will be ignored.
 #### createRestResource
 
 Creates a resource in an existing SpringBoot REST project (includes the Resource, ResourceSpec, ResourceWireSpec, etc)
-* You may need to update the package for application.properties swagger.resource.package if your resource does not live in com.blackbaud.<servicePackageName>.resources
+* You may need to update the package for application.properties swagger.resource.package if your resource does not live in org.dreamscale.<servicePackageName>.resources
 
 #### addPostgresContainer
 
 Adds a Postgres docker container configuration to an existing project
+
+
+## Publishing to Bintray
+
+Make sure you have a bintray account and are a member of the [DreamScale organization](https://bintray.com/dreamscale/organization/edit)
+
+Open your [user profile](https://bintray.com/profile/edit/organizations) and retrieve your API Key
+
+Execute bintray upload `gw bintrayUpload -Pbintray.user=<bintray user> -Pbintray.apiKey=<api key>`
+
+Open the DreamScale [gradle-templates](https://bintray.com/dreamscale/maven-public/org.dreamscale%3Agradle-templates) package and
+click the [Publish](https://bintray.com/dreamscale/maven-public/org.dreamscale%3Agradle-templates/publish) link

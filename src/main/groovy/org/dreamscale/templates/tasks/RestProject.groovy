@@ -112,23 +112,24 @@ class RestProject {
     void createCrudResource(String resourceName, boolean addEntity, boolean addWireSpec) {
         addResourceAndSupportingClasses(resourceName, addWireSpec)
 
-        String resourceParamName = resourceName[0].toLowerCase() + resourceName.substring(1)
+        String dtoName = "${resourceName}Dto"
+        String dtoParamName = dtoName[0].toLowerCase() + dtoName.substring(1)
 
         File resourceFile = basicProject.findFile("${resourceName}Resource.java")
         FileUtils.appendAfterLine(resourceFile, "class", """\
 
     @GetMapping("/{id}")
-    public ${resourceName} find(@PathVariable("id") UUID id) {
+    public ${dtoName} find(@PathVariable("id") UUID id) {
         throw new IllegalStateException("implement");
     }
 
     @PostMapping
-    public ${resourceName} create(@Valid @RequestBody ${resourceName} ${resourceParamName}) {
+    public ${dtoName} create(@Valid @RequestBody ${dtoName} ${dtoParamName}) {
         throw new IllegalStateException("implement");
     }
 
     @PutMapping
-    public ${resourceName} update(@Valid @RequestBody ${resourceName} ${resourceParamName}) {
+    public ${dtoName} update(@Valid @RequestBody ${dtoName} ${dtoParamName}) {
         throw new IllegalStateException("implement");
     }
 
@@ -142,19 +143,19 @@ class RestProject {
         FileUtils.appendAfterLine(clientFile, "interface", """\
 
     @RequestLine("GET " + ResourcePaths.${resourcePathVarName} + "/{id}")
-    ${resourceName} find(@Param("id") UUID id);
+    ${dtoName} find(@Param("id") UUID id);
 
     @RequestLine("POST " + ResourcePaths.${resourcePathVarName})
-    ${resourceName} create(${resourceName} ${resourceParamName});
+    ${dtoName} create(${dtoName} ${dtoParamName});
 
     @RequestLine("PUT " + ResourcePaths.${resourcePathVarName})
-    ${resourceName} update(${resourceName} ${resourceParamName});
+    ${dtoName} update(${dtoName} ${dtoParamName});
 
     @RequestLine("DELETE " + ResourcePaths.${resourcePathVarName} + "/{id}")
     void delete(@Param("id") UUID id);"""
         )
 
-        addApiObject(resourceName)
+        addApiObject(dtoName)
 
         if (addEntity) {
             addEntityObject(resourceName)
@@ -259,8 +260,9 @@ import ${servicePackage}.client.${resourceName}Client;
         datasourceProject.addCreateTableScript(resourcePath)
     }
 
-    void addApiObject(String resourceName, boolean upperCamel = false) {
-        basicProject.addApiObject("rest", resourceName, upperCamel)
+    void addApiObject(String dtoName, boolean upperCamel = false) {
+        basicProject.addApiObject("rest", dtoName, upperCamel)
+        FileUtils.removeLine(basicProject.getBuildFile(), "common-spring-boot-rest-feign")
     }
 
     void createBasicResource(String resourceName, boolean addWireSpec) {

@@ -101,7 +101,7 @@ class GitRepo {
 
     static class GitPushFailedException extends RuntimeException {
         GitPushFailedException(String message) {
-            super(message);
+            super(message)
         }
     }
 

@@ -237,23 +237,23 @@ class BasicProject {
         }
     }
 
-    void addApiObject(String type, String resourceName, boolean upperCamel) {
+    void addApiObject(String type, String dtoName, boolean upperCamel) {
         addClientSubmodule(type)
 
         String apiPackage = "${servicePackage}.api"
         String apiPackagePath = packageToPath(apiPackage)
         String typeUpperCase = type.capitalize()
 
-        String resourceNameLowerCamel = UPPER_CAMEL.to(LOWER_CAMEL, resourceName)
+        String dtoNameLowerCamel = UPPER_CAMEL.to(LOWER_CAMEL, dtoName)
 
         applyTemplate("${type}-client/src/main/java/${apiPackagePath}") {
-            "${resourceName}.java" template: "/templates/springboot/${type}/resource-api.java.tmpl",
-                                   resourceName: resourceName, packageName: apiPackage,
+            "${dtoName}.java" template: "/templates/springboot/${type}/resource-api.java.tmpl",
+                                   resourceName: dtoName, packageName: apiPackage,
                                    upperCamel: upperCamel
         }
         applyTemplate("${type}-client/src/mainTest/groovy/${apiPackagePath}") {
-            "Random${resourceName}Builder.groovy" template: "/templates/test/random-client-builder.groovy.tmpl",
-                                                  targetClass: resourceName, packageName: apiPackage,
+            "Random${dtoName}Builder.groovy" template: "/templates/test/random-client-builder.groovy.tmpl",
+                                                  targetClass: dtoName, packageName: apiPackage,
                                                   qualifier: "${typeUpperCase}Client"
         }
 
@@ -275,8 +275,8 @@ class BasicProject {
         }
         FileUtils.appendToClass(randomClientBuilderSupport, """
 
-    public Random${resourceName}Builder ${resourceNameLowerCamel}() {
-        return new Random${resourceName}Builder();
+    public Random${dtoName}Builder ${dtoNameLowerCamel}() {
+        return new Random${dtoName}Builder();
     }
 """)
     }

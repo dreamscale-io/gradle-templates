@@ -112,6 +112,8 @@ class RestProject {
     void createCrudResource(String resourceName, boolean addEntity, boolean addWireSpec) {
         addResourceAndSupportingClasses(resourceName, addWireSpec)
 
+        String resourceParamName = resourceName[0].toLowerCase() + resourceName.substring(1)
+
         File resourceFile = basicProject.findFile("${resourceName}Resource.java")
         FileUtils.appendAfterLine(resourceFile, "class", """\
 
@@ -119,14 +121,38 @@ class RestProject {
     public ${resourceName} find(@PathVariable("id") UUID id) {
         throw new IllegalStateException("implement");
     }
-""")
 
+    @PostMapping
+    public ${resourceName} create(@Valid @RequestBody ${resourceName} ${resourceParamName}) {
+        throw new IllegalStateException("implement");
+    }
+
+    @PutMapping
+    public ${resourceName} update(@Valid @RequestBody ${resourceName} ${resourceParamName}) {
+        throw new IllegalStateException("implement");
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable("id") UUID id) {
+        throw new IllegalStateException("implement");
+    }""")
+
+        String resourcePathVarName = getResourcePathVarName(resourceName)
         File clientFile = basicProject.findFile("${resourceName}Client.java")
-        FileUtils.appendAfterLine(clientFile, "class", """\
+        FileUtils.appendAfterLine(clientFile, "interface", """\
 
-    @RequestLine("GET /{id}")
+    @RequestLine("GET " + ResourcePaths.${resourcePathVarName} + "/{id}")
     ${resourceName} find(@Param("id") UUID id);
-""")
+
+    @RequestLine("POST " + ResourcePaths.${resourcePathVarName})
+    ${resourceName} create(${resourceName} ${resourceParamName});
+
+    @RequestLine("PUT " + ResourcePaths.${resourcePathVarName})
+    ${resourceName} update(${resourceName} ${resourceParamName});
+
+    @RequestLine("DELETE " + ResourcePaths.${resourcePathVarName} + "/{id}")
+    void delete(@Param("id") UUID id);"""
+        )
 
         addApiObject(resourceName)
 
@@ -135,9 +161,17 @@ class RestProject {
         }
     }
 
+    private String getResourcePath(String resourceName) {
+        "${UPPER_CAMEL.to(LOWER_UNDERSCORE, resourceName)}"
+    }
+
+    private String getResourcePathVarName(String resourceName) {
+        "${getResourcePath(resourceName).toUpperCase()}_PATH"
+    }
+
     private void addResourceAndSupportingClasses(String resourceName, boolean addWireSpec) {
-        String resourcePath = "${UPPER_CAMEL.to(LOWER_UNDERSCORE, resourceName)}"
-        String resourceVarName = "${resourcePath.toUpperCase()}_PATH"
+        String resourcePath = getResourcePath(resourceName)
+        String resourceVarName = getResourcePathVarName(resourceName)
         String resourceNameLowerCamel = UPPER_CAMEL.to(LOWER_CAMEL, resourceName)
 
         addResourcePathConstant(resourcePath, resourceVarName)
@@ -146,20 +180,26 @@ class RestProject {
             "${resourceName}Resource.java" template: "/templates/springboot/rest/resource.java.tmpl",
                                            resourceName: resourceName, servicePackage: "${servicePackage}", resourcePathVar: resourceVarName
         }
-        basicProject.applyTemplate("src/main/java/${servicePackagePath}/client") {
+
+        basicProject.addClientSubmodule("rest")
+        FileUtils.removeLine(basicProject.getBuildFile(), "common-spring-boot-rest-feign")
+        basicProject.applyTemplate("rest-client/src/main/java/${servicePackagePath}/client") {
             "${resourceName}Client.java" template: "/templates/springboot/rest/resource-client.java.tmpl",
-                                         resourceName: resourceName, servicePackage: "${servicePackage}", resourcePathVar: resourceVarName
+                                         resourceName: resourceName, servicePackage: "${servicePackage}"
         }
+
         basicProject.applyTemplate("src/componentTest/groovy/${servicePackagePath}/resources") {
             "${resourceName}ResourceSpec.groovy" template: "/templates/springboot/rest/resource-spec.groovy.tmpl",
                                                  resourceName: resourceName, servicePackage: "${servicePackage}"
         }
+
         if (addWireSpec) {
             basicProject.applyTemplate("src/componentTest/groovy/${servicePackagePath}/resources") {
                 "${resourceName}ResourceWireSpec.groovy" template: "/templates/springboot/rest/resource-wirespec.groovy.tmpl",
                                                          resourceName: resourceName, servicePackage: "${servicePackage}"
             }
         }
+
         File testConfig = basicProject.findOptionalFile("ComponentTestConfig.java")
         if (testConfig == null) {
             testConfig = basicProject.findFile("TestConfig.java")
@@ -179,9 +219,9 @@ import ${servicePackage}.client.${resourceName}Client;
     }
 
     private void addResourcePathConstant(String resourcePath, String resourceVarName) {
-        File resourcePathsFile = basicProject.getProjectFile("src/main/java/${servicePackagePath}/api/ResourcePaths.java")
+        File resourcePathsFile = basicProject.getProjectFile("rest-client/src/main/java/${servicePackagePath}/api/ResourcePaths.java")
         if (resourcePathsFile.exists() == false) {
-            basicProject.applyTemplate("src/main/java/${servicePackagePath}/api") {
+            basicProject.applyTemplate("rest-client/src/main/java/${servicePackagePath}/api") {
                 'ResourcePaths.java' template: "/templates/springboot/rest/resource-paths.java.tmpl",
                         packageName: "${servicePackage}.api"
             }
@@ -193,7 +233,7 @@ import ${servicePackage}.client.${resourceName}Client;
     }
 
     void addEntityObject(String resourceName) {
-        String resourcePath = "${UPPER_CAMEL.to(LOWER_UNDERSCORE, resourceName)}"
+        String resourcePath = getResourcePath(resourceName)
         String resourceNameLowerCamel = UPPER_CAMEL.to(LOWER_CAMEL, resourceName)
 
         basicProject.applyTemplate("src/main/java/${servicePackagePath}/core/domain") {

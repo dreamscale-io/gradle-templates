@@ -75,6 +75,7 @@ spring.datasource.validation-query=SELECT 1;
 
     private applyPostgresCompileDependencies() {
         FileUtils.appendAfterLine(basicProject.getProjectFile("build.gradle"), 'compile "org.dreamscale:common-spring-boot-rest:', """\
+
     compile "org.springframework.boot:spring-boot-starter-data-jpa"
     compile "postgresql:postgresql:9.0-801.jdbc4"
     compile "org.liquibase:liquibase-core\""""

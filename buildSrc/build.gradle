@@ -1,3 +1,8 @@
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
 dependencies {
     compile gradleApi()
     compile 'com.google.guava:guava:18.0'

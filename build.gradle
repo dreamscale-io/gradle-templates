@@ -4,7 +4,7 @@ buildscript {
     }
 }
 
-apply plugin: "org.dreamscale.core-oss"
+apply plugin: "org.dreamscale.core"
 apply plugin: "org.dreamscale.gradle-templates"
 
 setGradleVersions()

@@ -121,7 +121,7 @@ class BasicProject {
         File gradleWrapperProperties = new File(repoDir, "gradle/wrapper/gradle-wrapper.properties")
         String text = gradleWrapperProperties.text
         String dreamscaleGradleVersion = getDreamscaleGradleVersion()
-        String distributionUrl = "https://dl.bintray.com/dreamscale/maven-public/org/dreamscale/dreamscale-gradle/${dreamscaleGradleVersion}/dreamscale-gradle-${dreamscaleGradleVersion}-bin.zip"
+        String distributionUrl = "https://dl.bintray.com/dreamscale-io/maven-public/org/dreamscale/dreamscale-gradle/${dreamscaleGradleVersion}/dreamscale-gradle-${dreamscaleGradleVersion}-bin.zip"
         gradleWrapperProperties.text = text.replaceFirst(/(?m)^distributionUrl=.*/, /distributionUrl=${distributionUrl}/)
     }
 
